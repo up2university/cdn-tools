@@ -1,0 +1,22 @@
+version: '2'
+services:
+    varnish:
+        image: up2university/cdn-varnish
+        container_name: varnish
+        ports:
+        - 80:80
+        depends_on:
+        - nginx
+        tmpfs:
+        - "/usr/local/var/varnish"
+    nginx:
+        image: up2university/cdn-nginx
+        container_name: nginx
+        # uncomment for dev purposes only
+        # ports:
+        # - 8080:80
+        tmpfs:
+        - "/var/log/nginx"
+        - "/var/cache/nginx"
+        - "/var/run"
+

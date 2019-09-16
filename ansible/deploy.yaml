@@ -1,0 +1,45 @@
+---
+- name: deploy
+  hosts: all
+  gather_facts: True
+  tasks:
+
+    # prerequisites
+
+    - name: pip install docker
+      pip:
+        name: docker
+        state: present
+      ignore_errors: yes
+
+    - name: pip install requests
+      pip:
+        name: requests
+        state: present
+      ignore_errors: yes
+
+    # actual deployments
+
+    - name: upload docker-compose.yml
+      copy:
+        src: ../compose/docker-compose.yml
+        dest: docker-compose.yml
+        backup: yes
+
+    - name: docker-compose up
+      docker_compose:
+        project_src: .
+        state: present
+
+    # final checks
+
+    - name: wait for URL to become ready
+      uri:
+        url: "http://{{ ansible_host }}/"
+        status_code: 403
+        timeout: 5
+      register: _http
+      until: _http.status == 403
+      delay: 10
+      retries: 12
+

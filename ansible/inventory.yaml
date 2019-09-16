@@ -1,0 +1,15 @@
+all:
+  hosts:
+    fct:
+      ansible_host: 193.137.197.27
+    garr:
+      ansible_host: 90.147.188.203
+    grnet:
+      ansible_host: 83.212.100.106
+    kifu:
+      ansible_host: 193.224.22.61
+    psnc:
+      ansible_host: 62.3.170.199
+  vars:
+    domain_name: geo-cdn.test.up2university.eu
+

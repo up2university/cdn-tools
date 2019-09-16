@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: cdn
+spec:
+  host: {{ domain_name }}
+  to:
+    kind: Service
+    name: varnish
+    weight: 100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: varnish
+spec:
+  selector:
+    name: varnish
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  selector:
+    name: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: varnish
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    name: varnish
+  template:
+    metadata:
+      labels:
+        name: varnish
+    spec:
+      containers:
+      - name: varnish
+        image: up2university/cdn-varnish
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: "/test.html"
+            port: 80
+            scheme: HTTP
+          periodSeconds: 15
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    name: nginx
+  template:
+    metadata:
+      labels:
+        name: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: up2university/cdn-nginx
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: "/test.html"
+            port: 80
+            scheme: HTTP
+          periodSeconds: 15
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+      restartPolicy: Always
+
